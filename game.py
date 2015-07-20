@@ -40,8 +40,21 @@ class TitleScene(Scene):
 
   def update(self):
     key = self._screen.read_key()
-    if key == 'q':
-      ActiveScene.change(EndingScene())
+    ActiveScene.change(PlayingScene())
+
+class PlayingScene(Scene):
+  def __init__(self):
+    Scene.__init__(self)
+    self._screen = Screen()
+
+  def initialize(self):
+    self._screen.clear()
+    self._screen.set_color(Color.GREEN)
+    self._screen.write('Playng...')
+
+  def update(self):
+    key = self._screen.read_key()
+    ActiveScene.change(EndingScene())
 
 class EndingScene(Scene):
   def __init__(self):
@@ -52,12 +65,13 @@ class EndingScene(Scene):
     self._screen.clear()
     self._screen.set_color(Color.RED)
     self._screen.write('You Win!!')
-    self._screen.move(0, 0)
+    self._screen.move(1, 0)
+    self._screen.set_color(Color.YELLOW)
+    self._screen.write('-- Press Any Key --')
 
   def update(self):
     key = self._screen.read_key()
-    if key == 'q':
-      Game.over()
+    Game.over()
 
 class Game(Application):
   _is_over = False
