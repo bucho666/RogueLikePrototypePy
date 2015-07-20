@@ -21,17 +21,35 @@ class TitleScene(Scene):
 
   def initialize(self):
     self._screen.clear()
-    self._screen.write('タイトルシーン')
-    self._screen.move(0, 0)
+    self._screen.write('*** Rogue Rebuild ***')
+    self._screen.move((0, 0))
 
   def update(self):
     key = self._screen.read_key()
-    GameScene.change(PlayingScene())
+    GameScene.change(DungeonScene())
 
-class PlayingScene(Scene):
+class Position(object):
+  def __init__(self, x, y):
+    self._x, self._y = (x, y)
+
+  def xy(self):
+    return (self._x, self._y)
+
+class PlayerCharacter(object):
+  def __init__(self):
+    self._point = Position(1, 1)
+
+  def draw(self, screen):
+    screen.move(self._point.xy())
+    screen.set_color(Color.WHITE)
+    screen.write('@')
+    screen.move(self._point.xy())
+
+class DungeonScene(Scene):
   def __init__(self):
     Scene.__init__(self)
     self._screen = Screen()
+    self._player = PlayerCharacter()
 
   def initialize(self):
     self._screen.clear()
@@ -40,7 +58,11 @@ class PlayingScene(Scene):
 
   def update(self):
     key = self._screen.read_key()
-    GameScene.change(EndingScene())
+    if key == 'q':
+      GameScene.change(EndingScene())
+      return
+    self._screen.clear()
+    self._player.draw(self._screen)
 
 class EndingScene(Scene):
   def __init__(self):
@@ -50,8 +72,8 @@ class EndingScene(Scene):
   def initialize(self):
     self._screen.clear()
     self._screen.set_color(Color.RED)
-    self._screen.write('You Win!!')
-    self._screen.move(1, 0)
+    self._screen.write('You Won!!')
+    self._screen.move((0, 1))
     self._screen.set_color(Color.YELLOW)
     self._screen.write('-- Press Any Key --')
 

@@ -17,8 +17,8 @@ class Screen(object):
   def read_key(self):
       return chr(self._screen.getch())
 
-  def move(self, x, y):
-      self._screen.move(x, y)
+  def move(self, (x, y)):
+      self._screen.move(y, x)
 
   def set_color(self, color_id):
     self._current_color = self._color_table[color_id]
@@ -107,11 +107,11 @@ if __name__ == '__main__':
       key = self._screen.read_key()
       if key == 'q': sys.exit(1)
       self._screen.clear()
-      self._screen.move(1, 2)
+      self._screen.move((2, 1))
       self._screen.set_color(Color.DEFAULT)
       self._screen.write('入力キー: %s' % key)
       for color_id in range(Color.NUMBER):
-        self._screen.move(3 + color_id, 2)
+        self._screen.move((2, 3 + color_id))
         self._screen.set_color(color_id)
         self._screen.write('color: %d' % color_id)
 
