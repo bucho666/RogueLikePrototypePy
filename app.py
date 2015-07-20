@@ -86,12 +86,10 @@ class Color(object):
 class Application(object):
   def run(self):
     locale.setlocale(locale.LC_ALL, '')
-    curses.wrapper(self._main)
+    curses.wrapper(self.main)
 
-  def _main(self, args):
-    Screen().initialize()
-    while True:
-      self.process()
+  def main(self):
+    pass
 
 if __name__ == '__main__':
   class Demo(Application):
@@ -99,6 +97,11 @@ if __name__ == '__main__':
     def __init__(self):
       Application.__init__(self)
       self._screen = Screen()
+
+    def main(self, args):
+      Screen().initialize()
+      while True:
+        self.process()
 
     def process(self):
       key = self._screen.read_key()
