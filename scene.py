@@ -39,20 +39,6 @@ class Position(object):
     x, y = other.xy()
     return Position(self._x + x, self._y + y)
 
-class PlayerCharacter(object):
-  def __init__(self):
-    self._point = Position(1, 1)
-
-  def draw(self, screen):
-    screen.move(self._point.xy())
-    screen.set_color(Color.WHITE)
-    screen.write('@')
-    screen.move(self._point.xy())
-
-  def move(self, direction):
-    self._point += direction
-    return self
-
 class Direction(object):
   EAST  = Position( 1,  0)
   WEST  = Position(-1,  0)
@@ -62,6 +48,36 @@ class Direction(object):
   NORTH_WEST = NORTH + WEST
   SOUTH_EAST = SOUTH + EAST
   SOUTH_WEST = SOUTH + WEST
+
+class PlayerCharacter(object):
+  def __init__(self):
+    self._position = Position(1, 1)
+
+  def draw(self, screen):
+    screen.move(self._position.xy())
+    screen.set_color(Color.WHITE)
+    screen.write('@')
+    screen.move(self._position.xy())
+
+  def move(self, direction):
+    self._position += direction
+    return self
+
+  def position(self):
+    return self._position
+
+MAP = [
+      ['###################################################'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['#.................................................#'],
+      ['###################################################'],
+      ]
 
 class DungeonScene(Scene):
   def __init__(self):
@@ -75,11 +91,11 @@ class DungeonScene(Scene):
     self._screen.write('Now Playng...')
 
   def update(self):
-    key = self._screen.read_key()
-    if key == 'q':
-      GameScene.change(EndingScene())
-      return
-    elif key == 'l': self._player.move(Direction.EAST)
+   self.draw()
+   self.control(self._screen.read_key())
+
+  def control(self, key):
+    if   key == 'l': self._player.move(Direction.EAST)
     elif key == 'h': self._player.move(Direction.WEST)
     elif key == 'k': self._player.move(Direction.NORTH)
     elif key == 'j': self._player.move(Direction.SOUTH)
@@ -87,7 +103,17 @@ class DungeonScene(Scene):
     elif key == 'u': self._player.move(Direction.NORTH_EAST)
     elif key == 'b': self._player.move(Direction.SOUTH_WEST)
     elif key == 'n': self._player.move(Direction.SOUTH_EAST)
+    elif key == 'q':
+      GameScene.change(EndingScene())
+      return
+
+  def draw(self):
     self._screen.clear()
+    self._screen.set_color(Color.WHITE)
+    for y, line in enumerate(MAP):
+      self._screen.move((0, y))
+      for c in line:
+        self._screen.write(c)
     self._player.draw(self._screen)
 
 class EndingScene(Scene):
