@@ -66,17 +66,20 @@ class PlayerCharacter(object):
   def position(self):
     return self._position
 
+  def moved_position(self, direction):
+    return self._position + direction
+
 MAP = [
-      ['###################################################'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['#.................................................#'],
-      ['###################################################'],
+      list('##########################'),
+      list('#.........#..............#'),
+      list('#.........#..............#'),
+      list('#.........#..............#'),
+      list('#.........#..............#'),
+      list('#.........#.#####........#'),
+      list('#...............#........#'),
+      list('#...............#........#'),
+      list('#...............#........#'),
+      list('##########################'),
       ]
 
 class DungeonScene(Scene):
@@ -95,24 +98,29 @@ class DungeonScene(Scene):
    self.control(self._screen.read_key())
 
   def control(self, key):
-    if   key == 'l': self._player.move(Direction.EAST)
-    elif key == 'h': self._player.move(Direction.WEST)
-    elif key == 'k': self._player.move(Direction.NORTH)
-    elif key == 'j': self._player.move(Direction.SOUTH)
-    elif key == 'y': self._player.move(Direction.NORTH_WEST)
-    elif key == 'u': self._player.move(Direction.NORTH_EAST)
-    elif key == 'b': self._player.move(Direction.SOUTH_WEST)
-    elif key == 'n': self._player.move(Direction.SOUTH_EAST)
+    if   key == 'l': self.move_character(Direction.EAST)
+    elif key == 'h': self.move_character(Direction.WEST)
+    elif key == 'k': self.move_character(Direction.NORTH)
+    elif key == 'j': self.move_character(Direction.SOUTH)
+    elif key == 'y': self.move_character(Direction.NORTH_WEST)
+    elif key == 'u': self.move_character(Direction.NORTH_EAST)
+    elif key == 'b': self.move_character(Direction.SOUTH_WEST)
+    elif key == 'n': self.move_character(Direction.SOUTH_EAST)
     elif key == 'q':
       GameScene.change(EndingScene())
       return
+
+  def move_character(self, direction):
+    x, y = self._player.moved_position(direction).xy()
+    if MAP[y][x] != '#':
+      self._player.move(direction)
 
   def draw(self):
     self._screen.clear()
     self._screen.set_color(Color.WHITE)
     for y, line in enumerate(MAP):
-      self._screen.move((0, y))
-      for c in line:
+      for x, c in enumerate(line):
+        self._screen.move((x, y))
         self._screen.write(c)
     self._player.draw(self._screen)
 
