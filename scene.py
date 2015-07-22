@@ -32,12 +32,18 @@ class Position(object):
   def __init__(self, x, y):
     self._x, self._y = (x, y)
 
-  def xy(self):
-    return (self._x, self._y)
-
   def __add__(self, other):
     x, y = other.xy()
     return Position(self._x + x, self._y + y)
+
+  def xy(self):
+    return (self._x, self._y)
+
+  def around_xy(self):
+    x, y = self._x, self._y
+    return ((x-1, y-1), (x,   y-1), (x+1, y-1),
+            (x-1, y  ),             (x+1, y  ),
+            (x-1, y+1), (x  , y+1), (x+1, y+1))
 
 class Direction(object):
   EAST  = Position( 1,  0)
@@ -66,19 +72,19 @@ class PlayerCharacter(object):
   def position(self):
     return self._position
 
+  def around_xy(self):
+    return self._position.around_xy()
+
   def moved_position(self, direction):
     return self._position + direction
 
 MAP = [
       list('##########################'),
-      list('#.........#..............#'),
-      list('#.........#..............#'),
-      list('#.........#..............#'),
-      list('#.........#..............#'),
-      list('#.........#.#####........#'),
-      list('#...............#........#'),
-      list('#...............#........#'),
-      list('#...............#........#'),
+      list('#....######.........######'),
+      list('#....####.+.#.....#.######'),
+      list('##+####...#.###.###.+...##'),
+      list('##......###.#.....#.###.##'),
+      list('###########.........+...##'),
       list('##########################'),
       ]
 
@@ -91,7 +97,6 @@ class DungeonScene(Scene):
   def initialize(self):
     self._screen.clear()
     self._screen.set_color(Color.GREEN)
-    self._screen.write('Now Playng...')
 
   def update(self):
    self.draw()
@@ -116,12 +121,10 @@ class DungeonScene(Scene):
       self._player.move(direction)
 
   def draw(self):
-    self._screen.clear()
-    self._screen.set_color(Color.WHITE)
-    for y, line in enumerate(MAP):
-      for x, c in enumerate(line):
+    self._screen.set_color(Color.DEFAULT)
+    for x, y in self._player.around_xy():
         self._screen.move((x, y))
-        self._screen.write(c)
+        self._screen.write(MAP[y][x])
     self._player.draw(self._screen)
 
 class EndingScene(Scene):
