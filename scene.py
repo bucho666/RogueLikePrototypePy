@@ -39,11 +39,11 @@ class Position(object):
   def xy(self):
     return (self._x, self._y)
 
-  def around_xy(self):
+  def around(self):
     x, y = self._x, self._y
-    return ((x-1, y-1), (x,   y-1), (x+1, y-1),
-            (x-1, y  ),             (x+1, y  ),
-            (x-1, y+1), (x  , y+1), (x+1, y+1))
+    return (Position(x-1, y-1), Position(x,   y-1), Position(x+1, y-1),
+            Position(x-1, y  ),                     Position(x+1, y  ),
+            Position(x-1, y+1), Position(x  , y+1), Position(x+1, y+1))
 
 class Direction(object):
   EAST  = Position( 1,  0)
@@ -72,8 +72,8 @@ class PlayerCharacter(object):
   def position(self):
     return self._position
 
-  def around_xy(self):
-    return self._position.around_xy()
+  def around_position(self):
+    return self._position.around()
 
   def moved_position(self, direction):
     return self._position + direction
@@ -97,30 +97,37 @@ MAP = ( [
       list('##########################'),
       ])
 
-class CurrentMap(object):
+class CurrentFloor(object):
   _floor = 0
   _terrain = MAP[_floor]
 
   def terrain_at(self, position):
     x, y = position.xy()
-    return CurrentMap._terrain[y][x]
+    return CurrentFloor._terrain[y][x]
 
   def draw_at(self, position, screen):
     screen.move(position.xy())
     screen.write(self.terrain_at(position))
 
   def is_last_floor(self):
-    return CurrentMap._floor == len(MAP) - 1
+    return CurrentFloor._floor == len(MAP) - 1
 
-  def next_floor(self):
-    CurrentMap._floor += 1
-    CurrentMap._terrain = MAP[CurrentMap._floor]
+  def can_walk(self, position):
+    return self.terrain_at(position) != '#'
+
+  def is_down_stairs_at(self, position):
+    return self.terrain_at(position) == '>'
+
+  def next(self):
+    CurrentFloor._floor += 1
+    CurrentFloor._terrain = MAP[CurrentFloor._floor]
     
 class DungeonScene(Scene):
   def __init__(self):
     Scene.__init__(self)
     self._screen = Screen()
     self._player = PlayerCharacter()
+    self._floor = CurrentFloor()
 
   def initialize(self):
     self._screen.clear()
@@ -139,24 +146,26 @@ class DungeonScene(Scene):
     elif key == 'u': self.move_character(Direction.NORTH_EAST)
     elif key == 'b': self.move_character(Direction.SOUTH_WEST)
     elif key == 'n': self.move_character(Direction.SOUTH_EAST)
-    elif key == '>':
-      m = CurrentMap()
-      if m.terrain_at(self._player.position()) != '>': return
-      if m.is_last_floor(): GameScene.change(EndingScene())
-      else:
-        m.next_floor()
-        self._screen.clear()
+    elif key == '>': self.down_stairs()
+
+  def down_stairs(self):
+    if not self._floor.is_down_stairs_at(self._player.position()):
+      return
+    if not self._floor.is_last_floor():
+      self._floor.next()
+      self._screen.clear()
+    else:
+      GameScene.change(EndingScene())
 
   def move_character(self, direction):
-    m = CurrentMap()
     next_position = self._player.moved_position(direction)
-    if m.terrain_at(next_position) != '#': self._player.move(direction)
+    if self._floor.can_walk(next_position):
+      self._player.move(direction)
 
   def draw(self):
-    m = CurrentMap()
     self._screen.set_color(Color.DEFAULT)
-    for x, y in self._player.around_xy():
-        m.draw_at(Position(x, y), self._screen)
+    for p in self._player.around_position():
+      self._floor.draw_at(p, self._screen)
     self._player.draw(self._screen)
 
 class EndingScene(Scene):
