@@ -4,8 +4,9 @@ from app import Color
 from game import Game
 from game import GameScene
 from floor import CurrentFloor 
-from floor import Position
 from floor import Direction
+from character import Monster
+from character import PlayerCharacter
 import random
 
 class Scene(object):
@@ -32,43 +33,6 @@ class TitleScene(Scene):
     key = self._screen.read_key()
     GameScene.change(DungeonScene())
 
-class Character(object):
-  def __init__(self):
-    self._position = Position(1, 1)
-    self._glyph = 'C'
-
-  def draw(self, screen):
-    screen.move(self._position.xy())
-    screen.set_color(Color.WHITE)
-    screen.write(self._glyph)
-
-  def walk(self, direction):
-    self._position += direction
-    return self
-
-  def position(self):
-    return self._position
-
-  def around_position(self):
-    return self._position.around()
-
-  def next_position(self, direction):
-    return self._position + direction
-
-class Monster(Character):
-  def __init__(self):
-    Character.__init__(self)
-    self._glyph = 'g'
-
-class PlayerCharacter(Character):
-  def __init__(self):
-    Character.__init__(self)
-    self._glyph = '@'
-
-  def draw(self, screen):
-    Character.draw(self, screen)
-    screen.move(self._position.xy())
-
 class DungeonScene(Scene):
   def __init__(self):
     Scene.__init__(self)
@@ -82,9 +46,9 @@ class DungeonScene(Scene):
     self._screen.clear()
 
   def update(self):
-    self.control(self._screen.read_key())
     self.walk_monster()
     self.draw()
+    self.control(self._screen.read_key())
 
   def control(self, key):
     if   key == 'l': self.walk_player(Direction.EAST)
