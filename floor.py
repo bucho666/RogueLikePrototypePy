@@ -8,6 +8,9 @@ class Position(object):
     x, y = other.xy()
     return Position(self._x + x, self._y + y)
 
+  def __eq__(self, other):
+    return self.xy() == other.xy()
+
   def xy(self):
     return (self._x, self._y)
 
@@ -26,6 +29,10 @@ class Direction(object):
   NORTH_WEST = NORTH + WEST
   SOUTH_EAST = SOUTH + EAST
   SOUTH_WEST = SOUTH + WEST
+  LIST = (
+    EAST, WEST, NORTH, SOUTH,
+    NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST
+  )
 
 MAP = ( [
       list('##########################'),
