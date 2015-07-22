@@ -15,19 +15,23 @@ class Screen(object):
     return self
 
   def read_key(self):
-      return chr(self._screen.getch())
+    return chr(self._screen.getch())
 
   def move(self, (x, y)):
-      self._screen.move(y, x)
+    self._screen.move(y, x)
+    return self
 
   def set_color(self, color_id):
     self._current_color = self._color_table[color_id]
+    return self
 
   def write(self, string):
     self._screen.addstr(string, self._current_color)
+    return self
 
   def clear(self):
     self._screen.clear()
+    return self
 
 class ScreenBuilder(object):
   @classmethod

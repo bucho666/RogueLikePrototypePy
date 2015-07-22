@@ -3,7 +3,7 @@ from app import Color
 from app import Screen
 from scene import Scene
 from game import GameScene
-from floor import CurrentFloor 
+from floor import CurrentFloor
 from floor import Direction
 from character import Monster
 from character import PlayerCharacter
@@ -77,7 +77,10 @@ class Sight(object):
 
   def draw_last_position(self, screen):
     for p in self._last_position.around():
-      self._floor.draw_at(p, screen)
+      if self._floor.terrain_at(p) != '.':
+        self._floor.draw_at(p, screen)
+      else:
+        screen.move(p.xy()).write(' ')
 
   def draw_current_position(self, screen):
     screen.set_color(Color.DEFAULT)
@@ -92,5 +95,5 @@ class Sight(object):
 
 if __name__ == '__main__':
   from title import TitleScene
-  from game import Game 
+  from game import Game
   Game(TitleScene()).run()
