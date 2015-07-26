@@ -8,7 +8,6 @@ from floor import Direction
 from character import Monster
 from character import PlayerCharacter
 from ending import EndingScene
-import random
 
 class DungeonScene(Scene):
   def __init__(self):
@@ -16,14 +15,14 @@ class DungeonScene(Scene):
     self._screen = Screen()
     self._player = PlayerCharacter()
     self._floor = CurrentFloor()
-    self._monster = Monster()
-    self._sight = Sight(self._player, self._monster)
+    self._sight = Sight(self._player)
+    self._floor.put_monster(Monster())
 
   def initialize(self):
     self._screen.clear()
 
   def update(self):
-    self.walk_monster()
+    self._floor.update_monsters()
     self.draw()
     self.control(self._screen.read_key())
 
@@ -38,17 +37,8 @@ class DungeonScene(Scene):
     elif key == 'n': self.walk_player(Direction.SOUTH_EAST)
     elif key == '>': self.down_stairs()
 
-  def walk_monster(self):
-    direction = random.choice(Direction.LIST)
-    self.walk_character(direction, self._monster)
-
   def walk_player(self, direction):
-    self.walk_character(direction, self._player)
-
-  def walk_character(self, direction, ch):
-    next_position = ch.next_position(direction)
-    if self._floor.can_walk(next_position):
-      ch.walk(direction)
+    self._floor.walk_character(direction, self._player)
 
   def down_stairs(self):
     if not self._floor.is_down_stairs_at(self._player.position()):
@@ -64,11 +54,10 @@ class DungeonScene(Scene):
     self._player.draw(self._screen)
 
 class Sight(object):
-  def __init__(self, character, monster):
+  def __init__(self, character):
     self._character = character
     self._last_position = character.position()
     self._floor = CurrentFloor()
-    self._monster = monster
 
   def draw(self, screen):
     self.draw_last_position(screen)
@@ -77,18 +66,12 @@ class Sight(object):
 
   def draw_last_position(self, screen):
     for p in self._last_position.around():
-      if self._floor.terrain_at(p) != '.':
-        self._floor.draw_at(p, screen)
-      else:
-        screen.move(p.xy()).write(' ')
+      self._floor.draw_unsight_at(p, screen)
 
   def draw_current_position(self, screen):
     screen.set_color(Color.DEFAULT)
     for p in self._character.around_position():
-      if self._monster.position() == p:
-        self._monster.draw(screen)
-      else:
-        self._floor.draw_at(p, screen)
+      self._floor.draw_sight_at(p, screen)
 
   def update_last_position(self):
     self._last_position = self._character.position()
